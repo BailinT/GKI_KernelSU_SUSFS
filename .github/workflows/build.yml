@@ -480,7 +480,7 @@ jobs:
         working-directory: ${{ env.KERNEL_ROOT }}/KernelSU
         run: |
           KBUILD_FILE="./kernel/Kbuild"
-          CUSTOM_TAG="${{ vars.MANAGER_STR }}"
+          CUSTOM_TAG="王德发刷机"
 
           if [ ! -f "$KBUILD_FILE" ]; then
             echo "未找到 $KBUILD_FILE，跳过 SukiSU 版本标识定制"
