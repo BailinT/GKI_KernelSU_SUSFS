@@ -475,8 +475,8 @@ jobs:
             echo "KSU_LATEST_COMMIT_DATE=未知" >> $GITHUB_ENV
           fi
 
-      - name: 配置 SukiSU 管理器信息
-        if: inputs.ksu_variant == 'SukiSU' || inputs.ksu_variant == 'SukiSU(40726)' || inputs.ksu_variant == 'SukiSU(40548)'
+      - name: 配置 SukiSU/ReSukiSU 管理器信息
+        if: inputs.ksu_variant == 'SukiSU' || inputs.ksu_variant == 'SukiSU(40726)' || inputs.ksu_variant == 'SukiSU(40548)' || inputs.ksu_variant == 'ReSukiSU'
         working-directory: ${{ env.KERNEL_ROOT }}/KernelSU
         run: |
           KBUILD_FILE="./kernel/Kbuild"
@@ -499,7 +499,7 @@ jobs:
             VERSION_TEMPLATE="v\$1-$GIT_HASH@$BRANCH_NAME"
           fi
 
-          awk -v body="$VERSION_TEMPLATE" '
+          if awk -v body="$VERSION_TEMPLATE" '
             BEGIN {
               in_block = 0
               replaced = 0
@@ -524,9 +524,15 @@ jobs:
                 exit 1
               }
             }
-          ' "$KBUILD_FILE" > "${KBUILD_FILE}.tmp" && mv "${KBUILD_FILE}.tmp" "$KBUILD_FILE"
-
-          echo "已更新 get_ksu_version_full 模板: $VERSION_TEMPLATE"
+          ' "$KBUILD_FILE" > "${KBUILD_FILE}.tmp"; then
+            mv "${KBUILD_FILE}.tmp" "$KBUILD_FILE"
+            echo "已更新 get_ksu_version_full 模板: $VERSION_TEMPLATE"
+          else
+            echo "未找到 get_ksu_version_full，尝试直接追加..."
+            echo "" >> "$KBUILD_FILE"
+            echo "# 王德发刷机 署名" >> "$KBUILD_FILE"
+            echo "ccflags-y += -DKSU_CUSTOM_TAG=\\\"${CUSTOM_TAG}\\\"" >> "$KBUILD_FILE"
+          fi
 
       - name: 应用 SUSFS 补丁
         if: inputs.enable_susfs
