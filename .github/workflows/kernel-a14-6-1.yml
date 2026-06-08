@@ -29,13 +29,13 @@ on:
         type: string
         default: "Sun Dec 01 08:10:00 UTC 2024"
       use_kpm:
-        description: "KPM 功能（patched 尚不支持）"
+        description: "KPM 功能（仅源码自带 CONFIG_KPM 时生效，patched 尚不支持）"
         required: true
         type: choice
         default: "disabled (关闭)"
         options:
           - "disabled (关闭)"
-          - "enabled (开启)"
+          - "enabled (源码支持时开启)"
           - "patched (开启并修补，尚不支持)"
       droidspaces:
         description: "Droidspaces 容器支持"

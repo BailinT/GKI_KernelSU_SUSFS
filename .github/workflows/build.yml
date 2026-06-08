@@ -1220,11 +1220,16 @@ jobs:
 
           if [ "${{ inputs.ksu_variant }}" == "SukiSU" ] || [ "${{ inputs.ksu_variant }}" == "SukiSU(40726)" ] || [ "${{ inputs.ksu_variant }}" == "SukiSU(40548)" ] || [ "${{ inputs.ksu_variant }}" == "ReSukiSU" ] || [ "${{ inputs.ksu_variant }}" == "Next" ]; then
             if [[ "${{ inputs.use_kpm }}" == enabled* ]] || [[ "${{ inputs.use_kpm }}" == patched* ]]; then
-              if ! grep -RqsE '^[[:space:]]*config[[:space:]]+KPM([[:space:]]|$)' common KernelSU 2>/dev/null; then
-                echo "错误: 已请求启用 KPM，但当前 KernelSU 代码未声明 CONFIG_KPM" >&2
-                exit 1
+              if [[ "${{ inputs.use_kpm }}" == patched* ]]; then
+                echo "::warning::KPM patched 尚不支持，仅尝试启用源码自带 CONFIG_KPM"
               fi
-              echo "CONFIG_KPM=y" >> "$DEFCONFIG"
+
+              if grep -RqsE '^[[:space:]]*config[[:space:]]+KPM([[:space:]]|$)' common KernelSU 2>/dev/null; then
+                echo "CONFIG_KPM=y" >> "$DEFCONFIG"
+                echo "已启用源码自带 KPM"
+              else
+                echo "::warning::已请求启用 KPM，但当前 ${{ inputs.ksu_variant }} 源码未声明 CONFIG_KPM，自动跳过 KPM"
+              fi
             fi
           fi
 
