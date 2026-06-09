@@ -58,13 +58,13 @@ on:
         required: false
       # ==================== 选项配置 ====================
       use_kpm:
-        description: "KPM 功能（仅源码自带 CONFIG_KPM 时生效，patched 尚不支持）"
+        description: "KPM 功能（enabled 仅开源码配置，patched 会编译后修补 Image）"
         type: choice
         default: "disabled (关闭)"
         options:
           - "disabled (关闭)"
           - "enabled (源码支持时开启)"
-          - "patched (开启并修补，尚不支持)"
+          - "patched (开启并修补 Image)"
       droidspaces:
         description: "Droidspaces 容器支持 (5.10~6.6: 槽位补丁, 6.12: 开/关)"
         type: choice
@@ -310,7 +310,7 @@ jobs:
           if [[ "${{ inputs.use_kpm }}" == enabled* ]]; then
             echo "KPM_STATUS=源码支持时开启" >> $GITHUB_ENV
           elif [[ "${{ inputs.use_kpm }}" == patched* ]]; then
-            echo "KPM_STATUS=请求修补（尚不支持）" >> $GITHUB_ENV
+            echo "KPM_STATUS=已启用 Image 修补" >> $GITHUB_ENV
           else
             echo "KPM_STATUS=未开启" >> $GITHUB_ENV
           fi
