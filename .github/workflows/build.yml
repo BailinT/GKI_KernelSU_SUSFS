@@ -814,6 +814,12 @@ jobs:
                   sed -i '/#include <linux\/cpufreq_times.h>/a #if defined(CONFIG_KSU_SUSFS_SUS_MAP) || defined(CONFIG_KSU_SUSFS_OPEN_REDIRECT)\n#include <linux\/susfs_def.h>\n#endif' ./fs/proc/base.c
                 fi
               fi
+              # 修复 6.1.25~6.1.68: 上游 OPEN_REDIRECT 使用了尚未引入的 VMA padding 宏
+              if [[ "$CURRENT_SUB" -ge 25 && "$CURRENT_SUB" -le 68 ]] \
+                && grep -qF 'end = VMA_PAD_START(vma);' ./fs/proc/task_mmu.c; then
+                sed -i 's/end = VMA_PAD_START(vma);/end = vma->vm_end;/g' ./fs/proc/task_mmu.c
+                echo "已修复 Android 14 6.1.25~6.1.68 task_mmu.c 缺少 VMA_PAD_START 问题"
+              fi
               fix_task_mmu_show_pad 75 "2024-05"
               # 修复 6.1 LTS: namespace.c 头部 hunk 失配，导致 SUSFS mount 符号缺少声明
               fix_namespace_susfs_mount_decls "Android 14 6.1" 'DEFAULT_KSU_MNT_ID\|susfs_mnt_id_ida'
