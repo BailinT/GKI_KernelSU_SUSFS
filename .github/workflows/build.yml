@@ -60,6 +60,10 @@ on:
         required: false
         type: boolean
         default: false
+      use_builtin_cfg80211:
+        required: false
+        type: boolean
+        default: false
       enable_susfs:
         required: true
         type: boolean
@@ -110,6 +114,7 @@ jobs:
           echo "KPM 功能      : ${{ inputs.use_kpm }}"
           echo "Re-Kernel     : ${{ inputs.use_rekernel }}"
           echo "CVE-2026-43499: ${{ inputs.cve_2026_43499_patch }}"
+          echo "内置cfg80211  : ${{ inputs.use_builtin_cfg80211 }}"
           echo "Droidspaces   : ${{ inputs.droidspaces }}"
           echo "NTSync        : ${{ inputs.droidspaces_ntsync }}"
           echo "产物上传模式  : ${{ inputs.artifact_upload_mode }}"
@@ -1217,6 +1222,12 @@ jobs:
           wget -O- https://github.com/vc-teahouse/Baseband-guard/raw/main/setup.sh | bash
           echo "CONFIG_BBG=y" >> common/arch/arm64/configs/gki_defconfig
           sed -i '/^config LSM$/,/^help$/{ /^[[:space:]]*default/ { /baseband_guard/! s/selinux/selinux,baseband_guard/ } }' common/security/Kconfig
+
+      - name: 内置 cfg80211（天玑机型 WiFi）
+        if: inputs.use_builtin_cfg80211
+        working-directory: ${{ env.KERNEL_ROOT }}
+        run: |
+          echo "CONFIG_CFG80211=y" >> common/arch/arm64/configs/gki_defconfig
 
       - name: 应用 Re-Kernel
         if: inputs.use_rekernel
