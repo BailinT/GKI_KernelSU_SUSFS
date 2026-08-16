@@ -83,6 +83,11 @@ on:
         required: false
         type: boolean
         default: false
+      only_sub_level:
+        description: "只构建指定子版本（如 58，留空=全部）"
+        required: false
+        type: string
+        default: ""
       cancel_susfs:
         description: "禁用 SUSFS"
         required: true
@@ -126,6 +131,10 @@ on:
         required: false
         type: boolean
         default: false
+      only_sub_level:
+        required: false
+        type: string
+        default: ""
       cancel_susfs:
         required: false
         type: boolean
@@ -153,6 +162,7 @@ on:
 jobs:
   build-kernels-a16-6-12:
     name: "6.12.${{ matrix.sub_level }}-${{ matrix.os_patch_level }}"
+    if: ${{ inputs.only_sub_level == '' || matrix.sub_level == inputs.only_sub_level }}
     strategy:
       fail-fast: false
       matrix:
