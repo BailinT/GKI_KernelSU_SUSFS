@@ -1227,7 +1227,16 @@ jobs:
         if: inputs.use_builtin_cfg80211
         working-directory: ${{ env.KERNEL_ROOT }}
         run: |
+          # CFG80211 的 Kconfig 依赖为 RFKILL || !RFKILL：gki_defconfig 的 CONFIG_RFKILL=m
+          # 会把 fragment 要求的 y 钳制成 m（kleaf 校验报 actual m expected y），
+          # 必须同时内置 RFKILL；rfkill.ko 也要从 GKI 模块清单移除，否则 dist 报缺件
+          if grep -q '^CONFIG_RFKILL=m' common/arch/arm64/configs/gki_defconfig; then
+            sed -i 's/^CONFIG_RFKILL=m/CONFIG_RFKILL=y/' common/arch/arm64/configs/gki_defconfig
+          else
+            echo "CONFIG_RFKILL=y" >> common/arch/arm64/configs/gki_defconfig
+          fi
           echo "CONFIG_CFG80211=y" >> common/arch/arm64/configs/gki_defconfig
+          sed -i 's|"net/rfkill/rfkill\.ko",||g' common/modules.bzl
 
       - name: 应用 Re-Kernel
         if: inputs.use_rekernel
