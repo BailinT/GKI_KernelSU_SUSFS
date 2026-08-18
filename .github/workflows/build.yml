@@ -1233,8 +1233,9 @@ jobs:
           # 内置 AOSP cfg80211 也不行（CRC 仍不匹配）。
           # 解法：保持 CONFIG_MODVERSIONS=y（不破坏 vermagic），patch check_version
           # 对特定模块跳过 CRC 检查，让 vendor 自己的 .ko 正常加载。
+          PATCH_FILE="$GITHUB_WORKSPACE/patches/skip_crc_for_wireless_modules.patch"
           cd common
-          git apply -v ../patches/skip_crc_for_wireless_modules.patch || patch -p1 -F 3 < ../patches/skip_crc_for_wireless_modules.patch || true
+          patch -p1 -F 3 < "$PATCH_FILE" || true
           grep -q "skip_crc_modules" kernel/module/version.c && echo "patch 应用成功" || { echo "::error::CRC skip patch 未应用"; exit 1; }
 
       - name: 应用 Re-Kernel
