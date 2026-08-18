@@ -1223,20 +1223,19 @@ jobs:
           echo "CONFIG_BBG=y" >> common/arch/arm64/configs/gki_defconfig
           sed -i '/^config LSM$/,/^help$/{ /^[[:space:]]*default/ { /baseband_guard/! s/selinux/selinux,baseband_guard/ } }' common/security/Kconfig
 
-      - name: 内置 cfg80211（天玑机型 WiFi）
+      - name: 跳过无线模块 CRC 检查（天玑机型 WiFi）
         if: inputs.use_builtin_cfg80211
         working-directory: ${{ env.KERNEL_ROOT }}
         run: |
-          # CFG80211 的 Kconfig 依赖为 RFKILL || !RFKILL：gki_defconfig 的 CONFIG_RFKILL=m
-          # 会把 fragment 要求的 y 钳制成 m（kleaf 校验报 actual m expected y），
-          # 必须同时内置 RFKILL；rfkill.ko 也要从 GKI 模块清单移除，否则 dist 报缺件
-          if grep -q '^CONFIG_RFKILL=m' common/arch/arm64/configs/gki_defconfig; then
-            sed -i 's/^CONFIG_RFKILL=m/CONFIG_RFKILL=y/' common/arch/arm64/configs/gki_defconfig
-          else
-            echo "CONFIG_RFKILL=y" >> common/arch/arm64/configs/gki_defconfig
-          fi
-          echo "CONFIG_CFG80211=y" >> common/arch/arm64/configs/gki_defconfig
-          sed -i 's|"net/rfkill/rfkill\.ko",||g' common/modules.bzl
+          # 小米/MTK 天玑机型的 vendor 无线模块（cfg80211/mac80211/rfkill/wlan_drv）
+          # 依赖的 cfg80211 ABI 与 AOSP GKI 内核有差异（cfg80211.h 结构体改动），
+          # 导致符号 CRC 不匹配（disagrees about version of symbol wiphy_new_nm）。
+          # 内置 AOSP cfg80211 也不行（CRC 仍不匹配）。
+          # 解法：保持 CONFIG_MODVERSIONS=y（不破坏 vermagic），patch check_version
+          # 对特定模块跳过 CRC 检查，让 vendor 自己的 .ko 正常加载。
+          cd common
+          git apply -v ../patches/skip_crc_for_wireless_modules.patch || patch -p1 -F 3 < ../patches/skip_crc_for_wireless_modules.patch || true
+          grep -q "skip_crc_modules" kernel/module/version.c && echo "patch 应用成功" || { echo "::error::CRC skip patch 未应用"; exit 1; }
 
       - name: 应用 Re-Kernel
         if: inputs.use_rekernel
