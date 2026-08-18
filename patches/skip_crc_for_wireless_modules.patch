@@ -1,9 +1,8 @@
-diff --git a/kernel/module/version.c b/kernel/module/version.c
 --- a/kernel/module/version.c
 +++ b/kernel/module/version.c
-@@ -67,6 +67,19 @@
+@@ -68,6 +68,22 @@
  	return 1;
-
+ 
  bad_version:
 +	/*
 +	 * 小米/MTK 天玑机型的 vendor 无线模块（cfg80211/mac80211/rfkill/wlan_drv）
