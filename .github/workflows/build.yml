@@ -468,7 +468,7 @@ jobs:
           OLDCAT='filechk_cat = cat $<'
           NEWCAT="filechk_cat = grep -vE 'CONFIG_KSU|KernelSU|SUSFS|NOMOUNT' \$<"
           if [ -f "$TARGET_MAKEFILE" ] && grep -qF "$OLDCAT" "$TARGET_MAKEFILE"; then
-            sed -i "s|^$OLDCAT|$NEWCAT|" "$TARGET_MAKEFILE"
+            sed -i "s#$OLDCAT#$NEWCAT#" "$TARGET_MAKEFILE"
             echo "IKCONFIG 已脱敏: $TARGET_MAKEFILE"
           else
             echo "::warning::未找到 $OLDCAT 规则, 跳过 IKCONFIG 脱敏"
