@@ -852,10 +852,14 @@ jobs:
           # 必须在「生成 SUSFS 集成补丁」之后运行，避免 NoMount 改动被计入 susfs.patch；
           # 且在「备份基准 defconfig」之后追加 CONFIG，确保 6.1+ 的 bazel fragment diff 能捕获 CONFIG_NOMOUNT。
           set -euo pipefail
-          # 拉取 NoMount 内核集成脚本（钉死 commit b8d26835 = v2.0.0，与内置的 nomount.zip 模块 v2.0.0 配对，防漂移；
-          # v2.0.0 起内核/模块 API 与旧版互不兼容，两者必须成对升级，勿单改一边）
+          # 拉取 NoMount 内核集成脚本（钉死 commit 016375c，与内置的 nomount.zip 模块 429 版配对，防漂移）
+          # ⚠️ 勿"升级"到 v2.0.0 tag（b8d26835）：那是 2026-08-24 的旧快照——上游 versionCode 才是版本序
+          # （v2.0.0=291；429=016375c 时代构建，晚约一个月，含上游其后 ~140 个 race/UAF/dentry 修复）。
+          # 2026-09-30 真机实证 v2.0.0 kernel panic：LKM 模式 add_key 通道 nm_key_instantiate UBSAN 数组越界
+          # （bugreport SYSTEM_LAST_KMSG 实锤），且 metamodule 接管挂载后 zygisk-next/hma-oss 全不加载。
+          # 待上游出 v2.0.x 新 tag、或以 6b1be18+ 内核侧配对应 CI 模块并真机验证通过后再成对升级。
           curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors \
-            https://raw.githubusercontent.com/maxsteeel/nomount/b8d26835/kernel/setup.sh | bash -s b8d26835
+            https://raw.githubusercontent.com/maxsteeel/nomount/016375c/kernel/setup.sh | bash -s 016375c
 
           if [ ! -L "fs/nomount" ]; then
             echo "::error::NoMount 集成失败：fs/nomount 软链接缺失"
@@ -1708,8 +1712,8 @@ jobs:
             echo "已内置 kpn.zip（KPatch Next 独立 KPM 模块）"
           fi
           if [[ "${{ inputs.use_nomount }}" == "true" ]]; then
-            wget -q -O "$ANYKERNEL3/nomount.zip" https://github.com/BailinT/GKI_KernelSU_SUSFS/raw/refs/heads/dev/nomount/NoMount-v2.0.0-b8d26835.zip || { echo "::error::nomount.zip 下载失败"; exit 1; }
-            echo "已内置 nomount.zip（NoMount v2.0.0 挂载元模块，与内核侧 b8d26835 配对）"
+            wget -q -O "$ANYKERNEL3/nomount.zip" https://github.com/BailinT/GKI_KernelSU_SUSFS/raw/refs/heads/dev/nomount/NoMount-429-016375c.zip || { echo "::error::nomount.zip 下载失败"; exit 1; }
+            echo "已内置 nomount.zip（NoMount 挂载元模块 429 版，与内核侧 016375c 配对）"
           fi
           ZIP_NAME="${{ inputs.android_version }}-${{ inputs.kernel_version }}.${{ inputs.sub_level }}-${{ inputs.os_patch_level }}-AnyKernel3.zip"
           mv ../Image ./Image
@@ -1724,8 +1728,8 @@ jobs:
             echo "已内置 kpn.zip（KPatch Next 独立 KPM 模块）"
           fi
           if [[ "${{ inputs.use_nomount }}" == "true" ]]; then
-            wget -q -O "$ANYKERNEL3/nomount.zip" https://github.com/BailinT/GKI_KernelSU_SUSFS/raw/refs/heads/dev/nomount/NoMount-v2.0.0-b8d26835.zip || { echo "::error::nomount.zip 下载失败"; exit 1; }
-            echo "已内置 nomount.zip（NoMount v2.0.0 挂载元模块，与内核侧 b8d26835 配对）"
+            wget -q -O "$ANYKERNEL3/nomount.zip" https://github.com/BailinT/GKI_KernelSU_SUSFS/raw/refs/heads/dev/nomount/NoMount-429-016375c.zip || { echo "::error::nomount.zip 下载失败"; exit 1; }
+            echo "已内置 nomount.zip（NoMount 挂载元模块 429 版，与内核侧 016375c 配对）"
           fi
 
       - name: 构建 Boot 镜像 (Android 12)
