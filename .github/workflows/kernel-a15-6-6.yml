@@ -104,6 +104,11 @@ on:
         required: false
         type: boolean
         default: false
+      use_builtin_cfg80211:
+        description: "内置 cfg80211（小米天玑等 MTK 机型 WiFi 需要，默认关闭）"
+        required: false
+        type: boolean
+        default: false
       supp_op:
         description: "启用一加 8E 支持"
         required: false
@@ -148,6 +153,10 @@ on:
         type: boolean
         default: false
       cve_2026_43499_patch:
+        required: false
+        type: boolean
+        default: false
+      use_builtin_cfg80211:
         required: false
         type: boolean
         default: false
@@ -210,6 +219,7 @@ jobs:
       use_nomount: ${{ inputs.use_nomount || false }}
       use_networking: ${{ inputs.use_networking || false }}
       cve_2026_43499_patch: ${{ inputs.cve_2026_43499_patch }}
+      use_builtin_cfg80211: ${{ inputs.use_builtin_cfg80211 || false }}
       export_susfs_patches: ${{ inputs.export_susfs_patches || false }}
       supp_op: ${{ inputs.supp_op || false }}
       enable_susfs: ${{ inputs.ksu_mode != '禁用SUSFS' && inputs.ksu_mode != '禁用KSU' }}
