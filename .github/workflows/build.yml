@@ -1708,11 +1708,11 @@ jobs:
         run: |
           cd "$ANYKERNEL3"
           if [[ "${{ inputs.use_kpm }}" == patched* ]]; then
-            wget -q -O ./kpn.zip https://github.com/cctv18/KPatch-Next/releases/latest/download/kpn.zip || { echo "::error::kpn.zip 下载失败"; exit 1; }
+            wget -q --tries 3 --timeout 60 -O ./kpn.zip https://github.com/cctv18/KPatch-Next/releases/latest/download/kpn.zip || { echo "::error::kpn.zip 下载失败"; exit 1; }
             echo "已内置 kpn.zip（KPatch Next 独立 KPM 模块）"
           fi
           if [[ "${{ inputs.use_nomount }}" == "true" ]]; then
-            wget -q -O "$ANYKERNEL3/nomount.zip" https://github.com/BailinT/GKI_KernelSU_SUSFS/raw/refs/heads/dev/nomount/NoMount-429-016375c.zip || { echo "::error::nomount.zip 下载失败"; exit 1; }
+            cp "$GITHUB_WORKSPACE/nomount/NoMount-429-016375c.zip" "$ANYKERNEL3/nomount.zip" || { echo "::error::nomount.zip 复制失败"; exit 1; }
             echo "已内置 nomount.zip（NoMount 挂载元模块 429 版，与内核侧 016375c 配对）"
           fi
           ZIP_NAME="${{ inputs.android_version }}-${{ inputs.kernel_version }}.${{ inputs.sub_level }}-${{ inputs.os_patch_level }}-AnyKernel3.zip"
@@ -1724,11 +1724,11 @@ jobs:
         run: |
           mv ./Image "$ANYKERNEL3/Image"
           if [[ "${{ inputs.use_kpm }}" == patched* ]]; then
-            wget -q -O "$ANYKERNEL3/kpn.zip" https://github.com/cctv18/KPatch-Next/releases/latest/download/kpn.zip || { echo "::error::kpn.zip 下载失败"; exit 1; }
+            wget -q --tries 3 --timeout 60 -O "$ANYKERNEL3/kpn.zip" https://github.com/cctv18/KPatch-Next/releases/latest/download/kpn.zip || { echo "::error::kpn.zip 下载失败"; exit 1; }
             echo "已内置 kpn.zip（KPatch Next 独立 KPM 模块）"
           fi
           if [[ "${{ inputs.use_nomount }}" == "true" ]]; then
-            wget -q -O "$ANYKERNEL3/nomount.zip" https://github.com/BailinT/GKI_KernelSU_SUSFS/raw/refs/heads/dev/nomount/NoMount-429-016375c.zip || { echo "::error::nomount.zip 下载失败"; exit 1; }
+            cp "$GITHUB_WORKSPACE/nomount/NoMount-429-016375c.zip" "$ANYKERNEL3/nomount.zip" || { echo "::error::nomount.zip 复制失败"; exit 1; }
             echo "已内置 nomount.zip（NoMount 挂载元模块 429 版，与内核侧 016375c 配对）"
           fi
 
